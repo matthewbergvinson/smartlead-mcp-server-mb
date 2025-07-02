@@ -139,7 +139,7 @@ export function registerWebhookTools(
       description: 'Retrieve a summary of webhook events and their delivery status.',
       inputSchema: GetWebhooksPublishSummarySchema.shape,
     },
-    async (params) => {
+    async (_params) => {
       try {
         const result = await client.webhooks.getWebhooksPublishSummary();
         return formatSuccessResponse('Webhook publish summary retrieved successfully', result);

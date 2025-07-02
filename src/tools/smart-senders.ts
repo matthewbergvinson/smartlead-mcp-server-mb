@@ -83,7 +83,7 @@ export function registerSmartSendersTools(
       description: 'Retrieve a list of available vendors for smart senders integration.',
       inputSchema: z.object({}).shape,
     },
-    async (params) => {
+    async (_params) => {
       try {
         const result = await client.smartSenders.getVendors();
         return formatSuccessResponse(
@@ -152,7 +152,7 @@ export function registerSmartSendersTools(
       description: 'Retrieve a list of all domains configured for smart senders.',
       inputSchema: z.object({}).shape,
     },
-    async (params) => {
+    async (_params) => {
       try {
         const result = await client.smartSenders.getDomainList();
         return formatSuccessResponse(

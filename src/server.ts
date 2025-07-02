@@ -31,15 +31,15 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { SmartLeadClient, SmartLeadError } from './client/index.js';
 import {
-  registerCampaignTools,
-  registerLeadTools,
   registerAnalyticsTools,
-  registerEmailAccountTools,
-  registerWebhookTools,
+  registerCampaignTools,
   registerClientManagementTools,
+  registerEmailAccountTools,
+  registerLeadTools,
+  registerSmartDeliveryTools,
   registerSmartSendersTools,
   registerStatisticsTools,
-  registerSmartDeliveryTools,
+  registerWebhookTools,
 } from './tools/index.js';
 import type { MCPToolResponse } from './types/config.js';
 

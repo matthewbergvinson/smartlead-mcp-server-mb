@@ -265,7 +265,11 @@ export function registerClientManagementTools(
           summary += `  - Replied: ${data.recent_performance.stats.replied || 0}`;
         }
 
-        return formatSuccessResponse(result.message || 'Team details retrieved', result.data, summary);
+        return formatSuccessResponse(
+          result.message || 'Team details retrieved',
+          result.data,
+          summary
+        );
       } catch (error: any) {
         // Enhanced error handling for specific cases
         if (error.code === 'TEAM_DETAILS_ERROR') {

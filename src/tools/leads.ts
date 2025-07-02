@@ -75,7 +75,7 @@ export function registerLeadTools(
     },
     async (params) => {
       try {
-        const validatedParams = FetchLeadCategoriesRequestSchema.parse(params);
+        const _validatedParams = FetchLeadCategoriesRequestSchema.parse(params);
         const result = await client.fetchLeadCategories();
         return formatSuccessResponse(
           'Lead categories retrieved successfully',

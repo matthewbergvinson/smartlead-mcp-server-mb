@@ -9,9 +9,9 @@
  */
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { z } from 'zod';
 import type { SmartLeadClient } from '../client/index.js';
 import type { MCPToolResponse } from '../types/config.js';
-import { z } from 'zod';
 
 // ================================
 // SCHEMAS
@@ -169,7 +169,7 @@ export function registerSmartDeliveryTools(
         'Retrieve provider IDs organized by geographic regions for smart delivery optimization.',
       inputSchema: z.object({}).shape,
     },
-    async (params) => {
+    async (_params) => {
       try {
         const result = await client.smartDelivery.getRegionWiseProviderIds();
         return formatSuccessResponse(
@@ -721,7 +721,7 @@ export function registerSmartDeliveryTools(
       description: 'Retrieve all smart delivery folders.',
       inputSchema: z.object({}).shape,
     },
-    async (params) => {
+    async (_params) => {
       try {
         const result = await client.smartDelivery.getAllFolders();
         return formatSuccessResponse(

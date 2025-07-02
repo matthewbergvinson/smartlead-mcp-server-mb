@@ -169,7 +169,7 @@ export function registerEmailAccountTools(
       description: 'Retrieve all email accounts associated with the current user.',
       inputSchema: z.object({}).shape,
     },
-    async (params) => {
+    async (_params) => {
       try {
         const result = await client.emailAccounts.getAllEmailAccounts();
         return formatSuccessResponse(

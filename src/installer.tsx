@@ -10,16 +10,16 @@
  * @version 1.6.1
  */
 
-import fs from 'fs';
-import { Box, render, Text, useApp, useInput } from 'ink';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { Box, Text, useApp, useInput } from 'ink';
 import BigText from 'ink-big-text';
 import Gradient from 'ink-gradient';
 import Link from 'ink-link';
 import SelectInput from 'ink-select-input';
 import Spinner from 'ink-spinner';
 import TextInput from 'ink-text-input';
-import os from 'os';
-import path from 'path';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { SmartLeadClient, SmartLeadError } from './client/index.js';
@@ -148,7 +148,7 @@ const readConfigSafely = (configPath: string): any => {
       const content = fs.readFileSync(configPath, 'utf8');
       return JSON.parse(content);
     }
-  } catch (error) {
+  } catch (_error) {
     console.warn(`Warning: Could not read config from ${configPath}`);
   }
   return {};
@@ -232,7 +232,7 @@ const WelcomeScreen: React.FC<{ onNext: () => void }> = ({ onNext }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setDots((prev) => (prev.length >= 3 ? '' : prev + '.'));
+      setDots((prev) => (prev.length >= 3 ? '' : `${prev}.`));
     }, 500);
     return () => clearInterval(interval);
   }, []);
@@ -342,7 +342,7 @@ const ApiKeyScreen: React.FC<{
     }
   };
 
-  useInput((inputChar, key) => {
+  useInput((_inputChar, key) => {
     if (key.escape) {
       onBack();
     } else if (key.return && !isValidating) {
@@ -463,7 +463,7 @@ const ClientSelectionScreen: React.FC<{
     }
   };
 
-  useInput((input, key) => {
+  useInput((_input, key) => {
     if (key.escape) {
       onBack();
     }

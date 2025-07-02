@@ -14,9 +14,7 @@ import type {
   CampaignMailboxStatisticsRequest,
   CampaignStatisticsRequest,
   CampaignTopLevelAnalyticsRequest,
-  DownloadCampaignDataRequest,
   SuccessResponse,
-  ViewDownloadStatisticsRequest,
   WarmupStatsByEmailRequest,
 } from '../../types.js';
 
@@ -381,112 +379,107 @@ export class StatisticsClient extends BaseSmartLeadClient {
     campaignId: number,
     downloadType: string,
     format: 'json' | 'csv' = 'json',
-    userId?: string
+    _userId?: string
   ): Promise<DownloadResponse> {
-    try {
-      // Fetch statistics data based on download type
-      let allData: unknown[] = [];
-      let hasMore = true;
-      let offset = 0;
-      const limit = 500; // Max limit per request
+    // Fetch statistics data based on download type
+    let allData: unknown[] = [];
+    let hasMore = true;
+    let offset = 0;
+    const limit = 500; // Max limit per request
 
-      // For now, all download types will use the general statistics endpoint
-      // In the future, we could use different endpoints based on downloadType
-      while (hasMore) {
-        const params = {
-          offset,
-          limit,
-          // Note: user_id is not supported by the statistics endpoint
-        };
+    // For now, all download types will use the general statistics endpoint
+    // In the future, we could use different endpoints based on downloadType
+    while (hasMore) {
+      const params = {
+        offset,
+        limit,
+        // Note: user_id is not supported by the statistics endpoint
+      };
 
-        const response = await this.withRetry(
-          () => this.apiClient.get(`/campaigns/${campaignId}/statistics`, { params }),
-          'download campaign statistics data'
-        );
+      const response = await this.withRetry(
+        () => this.apiClient.get(`/campaigns/${campaignId}/statistics`, { params }),
+        'download campaign statistics data'
+      );
 
-        if (response.data && (response.data as { data?: unknown[] }).data) {
-          const responseData = (response.data as { data: unknown[]; total_stats?: string | number })
-            .data;
-          allData = allData.concat(responseData);
+      if (response.data && (response.data as { data?: unknown[] }).data) {
+        const responseData = (response.data as { data: unknown[]; total_stats?: string | number })
+          .data;
+        allData = allData.concat(responseData);
 
-          // Check if there are more records to fetch
-          const totalRecords =
-            parseInt(String((response.data as { total_stats?: string | number }).total_stats)) || 0;
-          hasMore = offset + limit < totalRecords;
-          offset += limit;
-        } else {
-          hasMore = false;
-        }
+        // Check if there are more records to fetch
+        const totalRecords =
+          parseInt(String((response.data as { total_stats?: string | number }).total_stats)) || 0;
+        hasMore = offset + limit < totalRecords;
+        offset += limit;
+      } else {
+        hasMore = false;
       }
+    }
 
-      // Format the data based on requested format
-      if (format === 'csv') {
-        // Convert to CSV format
-        if (allData.length === 0) {
-          return {
-            format: 'csv',
-            encoding: 'utf-8',
-            filename: `campaign_${campaignId}_${downloadType}_${new Date().toISOString().split('T')[0]}.csv`,
-            mimeType: 'text/csv',
-            data: 'No data available',
-            size: 17,
-          };
-        }
-
-        // Get headers from the first object
-        const firstRow = allData[0] as Record<string, unknown>;
-        const headers = Object.keys(firstRow);
-        let csvContent = headers.join(',') + '\n';
-
-        // Add data rows
-        for (const row of allData) {
-          const rowData = row as Record<string, unknown>;
-          const values = headers.map((header) => {
-            const value = rowData[header];
-            // Handle null/undefined
-            if (value === null || value === undefined) return '';
-            // Escape quotes and wrap in quotes if contains comma, newline, or quotes
-            const stringValue = String(value);
-            if (
-              stringValue.includes(',') ||
-              stringValue.includes('\n') ||
-              stringValue.includes('"')
-            ) {
-              return `"${stringValue.replace(/"/g, '""')}"`;
-            }
-            return stringValue;
-          });
-          csvContent += values.join(',') + '\n';
-        }
-
-        // Convert to base64 for transport
-        const buffer = Buffer.from(csvContent, 'utf-8');
-        const base64Data = buffer.toString('base64');
-
+    // Format the data based on requested format
+    if (format === 'csv') {
+      // Convert to CSV format
+      if (allData.length === 0) {
         return {
           format: 'csv',
-          encoding: 'base64',
+          encoding: 'utf-8',
           filename: `campaign_${campaignId}_${downloadType}_${new Date().toISOString().split('T')[0]}.csv`,
           mimeType: 'text/csv',
-          data: base64Data,
-          size: buffer.length,
-        };
-      } else {
-        // Return JSON format
-        return {
-          format: 'json',
-          data: {
-            download_type: downloadType,
-            campaign_id: campaignId,
-            total_records: allData.length,
-            data: allData,
-            generated_at: new Date().toISOString(),
-          },
+          data: 'No data available',
+          size: 17,
         };
       }
-    } catch (error) {
-      // Re-throw the error to be handled by the retry mechanism
-      throw error;
+
+      // Get headers from the first object
+      const firstRow = allData[0] as Record<string, unknown>;
+      const headers = Object.keys(firstRow);
+      let csvContent = `${headers.join(',')}\n`;
+
+      // Add data rows
+      for (const row of allData) {
+        const rowData = row as Record<string, unknown>;
+        const values = headers.map((header) => {
+          const value = rowData[header];
+          // Handle null/undefined
+          if (value === null || value === undefined) return '';
+          // Escape quotes and wrap in quotes if contains comma, newline, or quotes
+          const stringValue = String(value);
+          if (
+            stringValue.includes(',') ||
+            stringValue.includes('\n') ||
+            stringValue.includes('"')
+          ) {
+            return `"${stringValue.replace(/"/g, '""')}"`;
+          }
+          return stringValue;
+        });
+        csvContent += `${values.join(',')}\n`;
+      }
+
+      // Convert to base64 for transport
+      const buffer = Buffer.from(csvContent, 'utf-8');
+      const base64Data = buffer.toString('base64');
+
+      return {
+        format: 'csv',
+        encoding: 'base64',
+        filename: `campaign_${campaignId}_${downloadType}_${new Date().toISOString().split('T')[0]}.csv`,
+        mimeType: 'text/csv',
+        data: base64Data,
+        size: buffer.length,
+      };
+    } else {
+      // Return JSON format
+      return {
+        format: 'json',
+        data: {
+          download_type: downloadType,
+          campaign_id: campaignId,
+          total_records: allData.length,
+          data: allData,
+          generated_at: new Date().toISOString(),
+        },
+      };
     }
   }
 

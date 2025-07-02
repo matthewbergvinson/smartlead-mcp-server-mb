@@ -1,10 +1,11 @@
 /**
  * SmartLead MCP Server - Configuration Types
  *
- * Core configuration interfaces and types for the SmartLead MCP server.
+ * Type definitions for configuration, responses, and common interfaces
+ * to improve type safety and reduce 'any' usage.
  *
  * @author LeadMagic Team
- * @version 1.5.0
+ * @version 1.6.2
  */
 
 /**
@@ -26,7 +27,7 @@ export interface SmartLeadConfig {
 }
 
 /**
- * MCP Tool Response interface
+ * Standard MCP tool response format
  */
 export interface MCPToolResponse {
   [x: string]: unknown;
@@ -35,3 +36,55 @@ export interface MCPToolResponse {
     text: string;
   }>;
 }
+
+/**
+ * Generic API response structure for SmartLead API
+ */
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
+  status?: number;
+}
+
+/**
+ * Common campaign data structure
+ */
+export interface CampaignData {
+  id: number;
+  name: string;
+  status?: string;
+  client_id?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
+ * Common lead data structure
+ */
+export interface LeadData {
+  id: number;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  company?: string;
+  title?: string;
+  phone?: string;
+  status?: string;
+  campaign_id?: number;
+}
+
+/**
+ * Format success response function type
+ */
+export type FormatSuccessResponseFn = (
+  message: string,
+  data: unknown,
+  summary?: string
+) => MCPToolResponse;
+
+/**
+ * Handle error function type
+ */
+export type HandleErrorFn = (error: unknown) => MCPToolResponse;
